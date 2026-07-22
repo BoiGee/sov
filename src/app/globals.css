@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/*
+ * Token system: two theme scopes share the same semantic variable names
+ * (--background, --foreground, --primary, ...) so components never branch
+ * on "which site am I in" — only the wrapping .theme-marketing / .theme-portal
+ * class (set once, in each route group's layout) changes.
+ */
+
+:root {
+  /* Fallback = portal "ledger paper" theme, so any ungrouped route
+     (e.g. a root-level not-found page) still renders sensibly. */
+  --background: #f6f1e4;
+  --card: #fffdf7;
+  --foreground: #262019;
+  --muted: #e9e0c8;
+  --muted-foreground: #6b5f4e;
+  --border: #ddd2b8;
+  --primary: #8a6a34;
+  --primary-foreground: #fffaf0;
+  --accent: #2f4d3a;
+  --accent-foreground: #f6f1e4;
+  --success: #2f6b46;
+  --warning: #8a5e10;
+  --destructive: #963a2a;
+  --ring: #8a6a34;
+}
+
+.theme-marketing {
+  --background: #0f1a24;
+  --card: #16232f;
+  --foreground: #eef2ee;
+  --muted: #1c2b34;
+  --muted-foreground: #9fb0ad;
+  --border: #2a3b40;
+  --primary: #b8935a;
+  --primary-foreground: #14202b;
+  --accent: #3f6355;
+  --accent-foreground: #eef2ee;
+  --success: #4c8c6b;
+  --warning: #c99a3e;
+  --destructive: #d17a63;
+  --ring: #b8935a;
+}
+
+.theme-portal {
+  --background: #f6f1e4;
+  --card: #fffdf7;
+  --foreground: #262019;
+  --muted: #e9e0c8;
+  --muted-foreground: #6b5f4e;
+  --border: #ddd2b8;
+  --primary: #8a6a34;
+  --primary-foreground: #fffaf0;
+  --accent: #2f4d3a;
+  --accent-foreground: #f6f1e4;
+  --success: #2f6b46;
+  --warning: #8a5e10;
+  --destructive: #963a2a;
+  --ring: #8a6a34;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+
+  --font-display: var(--font-display-family);
+  --font-sans: var(--font-sans-family);
+  --font-mono: var(--font-mono-family);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Always-visible focus states, independent of theme */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
