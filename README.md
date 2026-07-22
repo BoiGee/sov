@@ -9,11 +9,17 @@ pointing this at any real client data.
 
 Being delivered in milestones, each checked in before moving on:
 
-1. **Project scaffold** — done (this milestone)
+1. **Project scaffold** — done
 2. Database schema + migrations + seed data — not started
-3. Auth + role-based access control — not started (config skeleton only)
-4. Public marketing site content — not started (route stubs only)
-5. Client portal (read-only) — not started (route stubs only)
+3. Auth + role-based access control — **partially done ahead of schedule**: a
+   working demo login gates the portal/workspace by role (see below), but
+   it checks a hardcoded account list, not a database — see
+   [SECURITY.md](./SECURITY.md)
+4. **Public marketing site content — mostly done**: home, about, practice
+   areas, attorney bios, case results, FAQ, locations, contact form (UI
+   only, not wired to a `Lead` record yet)
+5. Client portal — dashboard and case detail render, but still fixed
+   placeholder data, not per-client real data
 6. Firm-side workspace (make it live) — not started (route stubs only)
 7. Lead intake → inbox → convert-to-matter — not started (form UI disabled)
 8. Notifications (email) — not started
@@ -32,8 +38,14 @@ stage rather than half-broken.
   branch on which site they're in
 - **Prisma ORM 7** targeting PostgreSQL, via the `@prisma/adapter-pg`
   driver adapter (portable across Neon, RDS, Supabase, or local Postgres)
-- **Auth.js (NextAuth v5)** — Credentials (email/password) + Resend-based
-  magic link, roles: `client` / `attorney` / `staff` / `admin`
+- **Auth.js (NextAuth v5)** — Credentials (email/password) provider is live
+  against a **hardcoded demo account list** (`src/lib/demo-accounts.ts`),
+  roles: `client` / `attorney` / `staff` / `admin`. The Resend magic-link
+  provider is written but disabled — it needs a database adapter that
+  doesn't exist yet
+- **Icons/imagery**: `lucide-react` for icons, initials-based avatar
+  components for attorneys (no stock photos of real people used as
+  placeholders for fictional attorneys), a generated monogram favicon
 - **Storage**: `src/lib/storage` defines a `StorageProvider` interface,
   implemented against the S3 API (works unmodified against AWS S3,
   Cloudflare R2, or local MinIO)
@@ -66,6 +78,26 @@ Nothing is required to boot `npm run dev` and browse the route stubs —
 become necessary once their respective milestone wires them up. Prisma
 itself needs `DATABASE_URL` starting in Milestone 2.
 
+### Demo login
+
+The portal and firm workspace are gated by a working sign-in flow, but it
+checks a hardcoded list, not a database (see
+[SECURITY.md](./SECURITY.md)). `AUTH_SECRET` must be set and `AUTH_URL`
+must be a real value (an **empty string breaks Auth.js's trusted-host
+check** — leave it unset instead if you don't want to set it). Visit
+[/login](http://localhost:3000/login) and use the quick-fill buttons, or:
+
+| Role      | Email                                     | Password           |
+| --------- | ------------------------------------------ | ------------------- |
+| client    | client@demo.sterlingvance.example           | ClientDemo123!       |
+| attorney  | attorney@demo.sterlingvance.example         | AttorneyDemo123!     |
+| staff     | staff@demo.sterlingvance.example            | StaffDemo123!        |
+| admin     | admin@demo.sterlingvance.example            | AdminDemo123!        |
+
+`client` lands in the portal (`/dashboard`); the other three land in the
+firm workspace (`/firm/matters`). `src/proxy.ts` redirects each role away
+from the other side if they try to cross over.
+
 ### Database migrations & seed data (from Milestone 2 onward)
 
 ```bash
@@ -83,23 +115,30 @@ goes live with a real client's information.
 ```
 src/
   app/
-    (marketing)/   public site — dark theme
-    (portal)/      client portal — ledger-paper theme, auth-gated (M3)
-    firm/          attorney/staff/admin workspace — ledger-paper theme, auth-gated (M3)
+    (marketing)/   public site — dark theme (home, about, practice areas,
+                   attorneys, case results, faq, locations, contact, legal)
+    (portal)/      client portal — ledger-paper theme, auth-gated
+    firm/          attorney/staff/admin workspace — ledger-paper theme, auth-gated
     login/         shared sign-in page (outside the auth-gated groups)
     api/auth/      Auth.js route handler
+    icon.tsx       generated favicon (no binary asset needed)
   components/
-    ui/            design-system primitives (Button, Card, Tabs, ...)
-    marketing/      marketing-site-specific components
+    ui/            design-system primitives (Button, Card, Tabs, Accordion, ...)
+    marketing/      PracticeAreaIcon, AttorneyAvatar
     portal/         Docket Board, Case Timeline, ...
   lib/
     prisma.ts       Prisma client singleton (driver adapter)
-    auth.ts         Auth.js config
-    rbac.ts         role/ownership check placeholder (M3)
+    auth.ts         Auth.js config (demo Credentials provider)
+    auth-actions.ts sign-out server action
+    demo-accounts.ts hardcoded demo login accounts (see above)
+    rbac.ts         ownership check placeholder (M3 — role gating already
+                     lives in proxy.ts, but per-record ownership doesn't)
     storage/        StorageProvider interface + S3 implementation
     email/          Resend wrapper
     rate-limit.ts   Upstash rate limiters
-  proxy.ts          route gating (Next.js 16 renamed `middleware` to `proxy`)
+  types/
+    next-auth.d.ts  adds `role` to the Auth.js Session/JWT types
+  proxy.ts          session + role gating (Next.js 16 renamed `middleware` to `proxy`)
 prisma/
   schema.prisma     datasource + generator only until Milestone 2
 ```
@@ -108,12 +147,16 @@ prisma/
 
 - All copy, attorney names, and the firm name are placeholder demo
   content — see `src/lib/content/`.
-- The `(portal)` and `firm/*` routes render fixed placeholder rows, not
-  real data, and are **not** access-controlled yet.
+- Sign-in is real (Auth.js, bcrypt-hashed comparison, JWT sessions,
+  role-based redirects) but checks a **hardcoded account list**, not a
+  database — see [SECURITY.md](./SECURITY.md).
+- The `(portal)` and `firm/*` routes are now access-controlled by role,
+  but every client sees the same fixed placeholder matters — there's no
+  per-client data yet, because there's no `Matter` model yet.
 - The contact form and firm-side action buttons are visually complete but
   disabled — no server action is wired up yet.
-- Auth.js has providers declared but no database adapter, no password
-  check, and no MFA yet.
+- The Resend magic-link provider is written but disabled (needs a
+  database adapter). No MFA, no password reset, no login rate limiting.
 
 ## Not built at all yet (flagged from the original spec)
 

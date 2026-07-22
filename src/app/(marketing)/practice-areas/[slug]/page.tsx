@@ -6,6 +6,8 @@ import { attorneys } from "@/lib/content/attorneys";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Accordion } from "@/components/ui/accordion";
+import { PracticeAreaIcon } from "@/components/marketing/practice-area-icon";
+import { AttorneyAvatar } from "@/components/marketing/attorney-avatar";
 
 export function generateStaticParams() {
   return practiceAreas.map((area) => ({ slug: area.slug }));
@@ -35,7 +37,8 @@ export default async function PracticeAreaPage({ params }: Props) {
   return (
     <div>
       <section className="mx-auto max-w-4xl px-6 py-20">
-        <p className="font-mono text-sm text-primary">{area.code}</p>
+        <PracticeAreaIcon slug={area.slug} className="h-10 w-10 text-primary" />
+        <p className="mt-4 font-mono text-sm text-primary">{area.code}</p>
         <h1 className="mt-2 font-display text-4xl">{area.name}</h1>
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
           {area.blurb}
@@ -84,9 +87,12 @@ export default async function PracticeAreaPage({ params }: Props) {
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
               {relatedAttorneys.map((attorney) => (
                 <Link key={attorney.slug} href={`/attorneys/${attorney.slug}`}>
-                  <Card className="h-full transition-colors hover:border-primary">
-                    <h3 className="font-display text-lg">{attorney.name}</h3>
-                    <p className="mt-1 text-sm text-primary">{attorney.title}</p>
+                  <Card className="flex h-full items-center gap-4 transition-colors hover:border-primary">
+                    <AttorneyAvatar name={attorney.name} size="sm" />
+                    <div>
+                      <h3 className="font-display text-lg">{attorney.name}</h3>
+                      <p className="mt-1 text-sm text-primary">{attorney.title}</p>
+                    </div>
                   </Card>
                 </Link>
               ))}

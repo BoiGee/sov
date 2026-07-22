@@ -5,22 +5,30 @@ This application is being built to hold **confidential legal client data**
 Treat everything in this repository as pre-production until the checklist
 below is complete — do not point it at real client data before then.
 
-## Status: Milestone 1 (scaffold)
+## Status: Milestone 1 (scaffold) + a demo login added ahead of schedule
 
-No security-relevant logic exists yet beyond intent baked into the
-architecture. Specifically, as of this milestone:
+**Authentication now exists, but it is a demo shortcut, not real auth.**
+`src/proxy.ts` gates the `(portal)` and `firm/*` routes behind a signed-in
+session and coarse role check (client vs. attorney/staff/admin). But:
 
-- There is **no authentication enforcement**. The `(portal)` and `firm/*`
-  routes render placeholder data and are not gated by `src/proxy.ts` yet —
-  the banner on those pages says so explicitly.
-- There is **no role-based access control**. `src/lib/rbac.ts` is a
-  placeholder that throws if called.
-- There are **no database models**, so there is nothing to leak yet — but
-  also no ownership checks to verify.
+- Credentials are checked against a **hardcoded list**
+  (`src/lib/demo-accounts.ts`), not a database. There is no real `User`
+  table yet — that's still Milestone 2.
+- There is **no ownership/ID-based access control**. Once signed in, every
+  client sees the same hardcoded placeholder matters — real per-client
+  scoping requires the `Matter` model and `src/lib/rbac.ts` (currently a
+  placeholder that throws if called), both landing in Milestone 3.
+- No MFA, no password reset, no rate limiting on the login endpoint, no
+  account lockout. The Resend magic-link provider is disabled entirely
+  (it requires a database adapter Auth.js doesn't have yet).
 - Document storage (`src/lib/storage`) is stubbed against the S3 API but
   not connected to any real bucket or access-control policy.
 - Rate limiting (`src/lib/rate-limit.ts`) is configured but not yet applied
-  to any route.
+  to any route, including the login endpoint above.
+
+**Do not reuse the demo credentials pattern for real users.** It exists
+solely so the portal/workspace UI can be clicked through before the real
+data layer lands.
 
 ## What real production use will require, beyond finishing the build
 

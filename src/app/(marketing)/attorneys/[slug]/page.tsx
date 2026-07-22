@@ -5,6 +5,7 @@ import { attorneys } from "@/lib/content/attorneys";
 import { practiceAreas } from "@/lib/content/practice-areas";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AttorneyAvatar } from "@/components/marketing/attorney-avatar";
 
 export function generateStaticParams() {
   return attorneys.map((attorney) => ({ slug: attorney.slug }));
@@ -30,7 +31,8 @@ export default async function AttorneyPage({ params }: Props) {
       <section className="mx-auto max-w-4xl px-6 py-20">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-[2fr_1fr]">
           <div>
-            <h1 className="font-display text-4xl">{attorney.name}</h1>
+            <AttorneyAvatar name={attorney.name} size="lg" />
+            <h1 className="mt-6 font-display text-4xl">{attorney.name}</h1>
             <p className="mt-2 text-primary">{attorney.title}</p>
             <p className="mt-6 text-lg text-muted-foreground">{attorney.bio}</p>
             <p className="mt-4 text-muted-foreground">{attorney.longBio}</p>

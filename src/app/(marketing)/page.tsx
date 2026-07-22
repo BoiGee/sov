@@ -1,13 +1,11 @@
 import Link from "next/link";
+import { ArrowRight, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Accordion } from "@/components/ui/accordion";
+import { PracticeAreaIcon } from "@/components/marketing/practice-area-icon";
+import { AttorneyAvatar } from "@/components/marketing/attorney-avatar";
 import { practiceAreas } from "@/lib/content/practice-areas";
 import { attorneys } from "@/lib/content/attorneys";
-import { testimonials } from "@/lib/content/testimonials";
-import { caseResults } from "@/lib/content/case-results";
-import { offices } from "@/lib/content/offices";
-import { generalFaqs } from "@/lib/content/faqs";
 
 const stats = [
   { label: "Years serving clients", value: "30+" },
@@ -17,25 +15,6 @@ const stats = [
 ];
 
 const barAdmissions = ["New York", "New Jersey", "Connecticut"];
-
-const values = [
-  {
-    title: "Responsive Communication",
-    body: "You will never wonder if your call was received. Every attorney and staff member commits to a same-business-day response.",
-  },
-  {
-    title: "Transparent Billing",
-    body: "Fee arrangements are agreed to in writing before work begins, whether that's hourly, flat-fee, or contingency.",
-  },
-  {
-    title: "Real Trial Experience",
-    body: "Our attorneys prepare every matter as though it could go to trial, which tends to produce better settlements too.",
-  },
-  {
-    title: "A Portal That Keeps You Informed",
-    body: "Status changes, documents, and messages all land in one secure place — not scattered across email and voicemail.",
-  },
-];
 
 const portalSteps = [
   {
@@ -52,33 +31,47 @@ const portalSteps = [
   },
 ];
 
+const learnMore = [
+  { href: "/about", title: "About the Firm", body: "Our story, our values, and what clients say." },
+  { href: "/case-results", title: "Case Results", body: "A sample of outcomes we've secured for clients." },
+  { href: "/faq", title: "FAQ", body: "Answers to the questions we hear most often." },
+  { href: "/locations", title: "Locations", body: "Office addresses, hours, and how to reach us." },
+];
+
 export default function HomePage() {
   return (
     <div>
-      <section className="mx-auto max-w-6xl px-6 py-24">
-        <p className="mb-4 font-mono text-sm uppercase tracking-widest text-primary">
-          Sterling Vance LLP
-        </p>
-        <h1 className="max-w-3xl font-display text-4xl leading-tight sm:text-5xl">
-          Steady counsel, clearly communicated.
-        </h1>
-        <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          A general-practice firm for the moments that matter — with a client
-          portal that shows you exactly where your case stands, always.
-        </p>
-        <div className="mt-10 flex gap-4">
-          <Link href="/contact">
-            <Button variant="primary">Request a Consultation</Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="secondary">Client Portal Login</Button>
-          </Link>
-        </div>
-        <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-8 text-xs uppercase tracking-wide text-muted-foreground">
-          <span>Licensed in:</span>
-          {barAdmissions.map((state) => (
-            <span key={state} className="font-mono">{state}</span>
-          ))}
+      <section className="relative overflow-hidden">
+        <Scale
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-96 w-96 text-primary/5 sm:h-[28rem] sm:w-[28rem]"
+        />
+        <div className="relative mx-auto max-w-6xl px-6 py-24">
+          <p className="mb-4 font-mono text-sm uppercase tracking-widest text-primary">
+            Sterling Vance LLP
+          </p>
+          <h1 className="max-w-3xl font-display text-4xl leading-tight sm:text-5xl">
+            Steady counsel, clearly communicated.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+            A general-practice firm for the moments that matter — with a
+            client portal that shows you exactly where your case stands,
+            always.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link href="/contact">
+              <Button variant="primary">Request a Consultation</Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="secondary">Client Portal Login</Button>
+            </Link>
+          </div>
+          <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-8 text-xs uppercase tracking-wide text-muted-foreground">
+            <span>Licensed in:</span>
+            {barAdmissions.map((state) => (
+              <span key={state} className="font-mono">{state}</span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -93,14 +86,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-20">
+      <section id="practice-areas" className="mx-auto max-w-6xl px-6 py-20">
         <h2 className="font-display text-3xl">Practice Areas</h2>
         <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {practiceAreas.map((area) => (
             <Link key={area.slug} href={`/practice-areas/${area.slug}`}>
               <Card className="h-full transition-colors hover:border-primary">
-                <p className="font-mono text-xs text-primary">{area.code}</p>
-                <h3 className="mt-2 font-display text-xl">{area.name}</h3>
+                <PracticeAreaIcon slug={area.slug} className="text-primary" />
+                <h3 className="mt-3 font-display text-xl">{area.name}</h3>
                 <p className="mt-3 text-sm text-muted-foreground">
                   {area.blurb}
                 </p>
@@ -112,50 +105,16 @@ export default function HomePage() {
 
       <section className="border-t border-border bg-card">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-display text-3xl">Why Sterling Vance</h2>
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((value) => (
-              <div key={value.title}>
-                <h3 className="font-display text-lg">{value.title}</h3>
+          <h2 className="font-display text-3xl">How the Client Portal Works</h2>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {portalSteps.map((step, i) => (
+              <div key={step.title}>
+                <p className="font-mono text-sm text-primary">0{i + 1}</p>
+                <h3 className="mt-2 font-display text-xl">{step.title}</h3>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {value.body}
+                  {step.body}
                 </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="font-display text-3xl">How the Client Portal Works</h2>
-        <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {portalSteps.map((step, i) => (
-            <div key={step.title}>
-              <p className="font-mono text-sm text-primary">0{i + 1}</p>
-              <h3 className="mt-2 font-display text-xl">{step.title}</h3>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {step.body}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-t border-border bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-display text-3xl">Recent Case Results</h2>
-          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Prior results do not guarantee a similar outcome in your matter —
-            every case depends on its own facts.
-          </p>
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {caseResults.map((result) => (
-              <Card key={result.summary}>
-                <p className="font-mono text-xs uppercase tracking-wide text-primary">
-                  {result.practiceArea}
-                </p>
-                <p className="mt-3 text-foreground">{result.summary}</p>
-              </Card>
             ))}
           </div>
         </div>
@@ -167,7 +126,8 @@ export default function HomePage() {
           {attorneys.map((attorney) => (
             <Link key={attorney.slug} href={`/attorneys/${attorney.slug}`}>
               <Card className="h-full transition-colors hover:border-primary">
-                <h3 className="font-display text-xl">{attorney.name}</h3>
+                <AttorneyAvatar name={attorney.name} />
+                <h3 className="mt-4 font-display text-xl">{attorney.name}</h3>
                 <p className="mt-1 text-sm text-primary">{attorney.title}</p>
                 <p className="mt-3 text-sm text-muted-foreground">
                   {attorney.bio}
@@ -180,48 +140,18 @@ export default function HomePage() {
 
       <section className="border-t border-border bg-card">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-display text-3xl">What Clients Say</h2>
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.quote}>
-                <p className="text-foreground">&ldquo;{testimonial.quote}&rdquo;</p>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  — {testimonial.context}
-                </p>
-              </Card>
-            ))}
-          </div>
-          <p className="mt-6 text-xs text-muted-foreground">
-            Testimonials reflect individual experiences and do not guarantee
-            a similar outcome for your matter.
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-3xl px-6 py-20">
-        <h2 className="font-display text-3xl">Frequently Asked Questions</h2>
-        <div className="mt-10">
-          <Accordion
-            items={generalFaqs.map((faq) => ({
-              id: faq.id,
-              question: faq.question,
-              answer: faq.answer,
-            }))}
-          />
-        </div>
-      </section>
-
-      <section className="border-t border-border bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-display text-3xl">Our Offices</h2>
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
-            {offices.map((office) => (
-              <div key={office.name}>
-                <h3 className="font-display text-xl">{office.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{office.address}</p>
-                <p className="mt-1 font-mono text-sm text-muted-foreground">{office.phone}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{office.hours}</p>
-              </div>
+          <h2 className="font-display text-3xl">Learn More</h2>
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {learnMore.map((item) => (
+              <Link key={item.href} href={item.href}>
+                <Card className="h-full transition-colors hover:border-primary">
+                  <h3 className="font-display text-lg">{item.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm text-primary">
+                    Learn more <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </span>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

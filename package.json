@@ -21,6 +21,7 @@
     "@upstash/redis": "^1.38.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "lucide-react": "^1.25.0",
     "next": "16.2.11",
     "next-auth": "^5.0.0-beta.32",
     "pg": "^8.22.0",
