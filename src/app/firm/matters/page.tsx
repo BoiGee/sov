@@ -1,4 +1,5 @@
 import { DocketBoard, type DocketRow } from "@/components/portal/docket-board";
+import { Card } from "@/components/ui/card";
 
 export const metadata = { title: "Matters — Firm Workspace" };
 
@@ -37,10 +38,31 @@ const placeholderRows: DocketRow[] = [
   },
 ];
 
+const statuses = ["Filed", "Discovery", "Hearing Scheduled", "Resolved"] as const;
+
 export default function FirmMattersPage() {
+  const statCounts = statuses.map((status) => ({
+    status,
+    count: placeholderRows.filter((row) => row.status === status).length,
+  }));
+
   return (
     <div>
       <h1 className="font-display text-3xl">Matters</h1>
+
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <Card>
+          <p className="font-display text-3xl text-primary">{placeholderRows.length}</p>
+          <p className="mt-1 text-sm text-muted-foreground">Total</p>
+        </Card>
+        {statCounts.map((s) => (
+          <Card key={s.status}>
+            <p className="font-display text-3xl text-primary">{s.count}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{s.status}</p>
+          </Card>
+        ))}
+      </div>
+
       <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
         <span className="rounded-sm border border-border px-3 py-1.5">
           Attorney: All
