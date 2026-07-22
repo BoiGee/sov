@@ -1,7 +1,9 @@
 import { Tabs } from "@/components/ui/tabs";
 import { CaseTimeline } from "@/components/portal/case-timeline";
+import { DocumentList } from "@/components/portal/document-list";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getDocumentsForMatter, getSignedDownloadHref } from "@/lib/demo-documents";
 
 const STAGES = ["Filed", "Discovery", "Hearing Scheduled", "Resolved"];
 
@@ -11,6 +13,7 @@ type Props = {
 
 export default async function FirmMatterDetailPage({ params }: Props) {
   const { id } = await params;
+  const documents = getDocumentsForMatter(id);
 
   return (
     <div>
@@ -54,10 +57,18 @@ export default async function FirmMatterDetailPage({ params }: Props) {
               id: "documents",
               label: "Documents",
               content: (
-                <Card className="text-center text-muted-foreground">
-                  No documents yet. Upload with an internal/client-visible
-                  flag lands in Milestone 6.
-                </Card>
+                <div>
+                  <DocumentList
+                    documents={documents}
+                    getDownloadHref={(doc) => getSignedDownloadHref(doc.id)}
+                  />
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    Demo documents against a hardcoded list — download links
+                    are still short-lived signed URLs, same as production
+                    will use against real object storage. Upload with an
+                    internal/client-visible flag lands in Milestone 6.
+                  </p>
+                </div>
               ),
             },
             {

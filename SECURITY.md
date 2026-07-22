@@ -30,6 +30,17 @@ session and coarse role check (client vs. attorney/staff/admin). But:
 solely so the portal/workspace UI can be clicked through before the real
 data layer lands.
 
+**Document downloads (`src/lib/demo-documents`, `/api/documents/[id]/download`)
+are also a demo shortcut layered on real security mechanics.** The route
+handler requires an authenticated session, rejects the `client` role
+outright (no per-matter ownership check exists yet to do this safely), and
+validates a short-lived HMAC-signed token before reading the file — the
+same "authenticate + verify a signed URL, never expose a permanent public
+link" shape production will use, just against a hardcoded document list
+and local disk instead of a real `Document` table and object storage. It
+reuses `AUTH_SECRET` to sign tokens; give document-download tokens their
+own secret before this becomes real.
+
 ## What real production use will require, beyond finishing the build
 
 Building the features correctly is necessary but not sufficient. Before
@@ -59,8 +70,9 @@ this application handles real client data, the firm should also arrange:
   ownership (a client must never reach another client's matter by
   guessing an ID) — lands in Milestone 3.
 - Document downloads only ever go through short-lived signed URLs, never
-  permanent public storage links — interface is in place (Milestone 1),
-  wired to real routes in Milestone 6.
+  permanent public storage links — demonstrated end to end against demo
+  documents now; wired to the real `Document` model and object storage in
+  Milestone 6.
 - Passwords hashed with bcrypt; MFA required for attorney/staff/admin
   roles — lands in Milestone 3.
 - All mutating actions (status changes, visibility changes) get an audit

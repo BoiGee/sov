@@ -20,7 +20,9 @@ Being delivered in milestones, each checked in before moving on:
    only, not wired to a `Lead` record yet)
 5. Client portal — dashboard and case detail render, but still fixed
    placeholder data, not per-client real data
-6. Firm-side workspace (make it live) — not started (route stubs only)
+6. Firm-side workspace — **document downloads work** (attorney/staff/admin
+   only, signed short-lived URLs, see below); status updates, uploads, and
+   messaging are still disabled stubs
 7. Lead intake → inbox → convert-to-matter — not started (form UI disabled)
 8. Notifications (email) — not started
 9. Polish pass (empty/error/loading states, mobile QA) — not started
@@ -98,6 +100,18 @@ check** — leave it unset instead if you don't want to set it). Visit
 firm workspace (`/firm/matters`). `src/proxy.ts` redirects each role away
 from the other side if they try to cross over.
 
+### Document downloads (demo)
+
+Sign in as `attorney`, `staff`, or `admin`, open a matter in the firm
+workspace (matters `1`, `3`, and `4` have demo documents attached — a
+`.docx`, a `.pdf`, and a `.png`), and use the Documents tab. Downloads go
+through `/api/documents/[id]/download`, which requires a session, rejects
+the `client` role, and validates a short-lived signed token
+(`src/lib/demo-documents/sign.ts`) before streaming the file from
+`data/demo-documents/`. The `client` role is rejected here, not just
+hidden in the UI, because there's no per-matter ownership check yet to
+safely let a client download *their own* documents only.
+
 ### Database migrations & seed data (from Milestone 2 onward)
 
 ```bash
@@ -121,19 +135,22 @@ src/
     firm/          attorney/staff/admin workspace — ledger-paper theme, auth-gated
     login/         shared sign-in page (outside the auth-gated groups)
     api/auth/      Auth.js route handler
+    api/documents/[id]/download/  signed demo-document download route
     icon.tsx       generated favicon (no binary asset needed)
   components/
     ui/            design-system primitives (Button, Card, Tabs, Accordion, ...)
     marketing/      PracticeAreaIcon, AttorneyAvatar
-    portal/         Docket Board, Case Timeline, ...
+    portal/         Docket Board, Case Timeline, DocumentList, ...
   lib/
     prisma.ts       Prisma client singleton (driver adapter)
     auth.ts         Auth.js config (demo Credentials provider)
     auth-actions.ts sign-out server action
     demo-accounts.ts hardcoded demo login accounts (see above)
+    demo-documents/ hardcoded document metadata + signed-token helpers
     rbac.ts         ownership check placeholder (M3 — role gating already
                      lives in proxy.ts, but per-record ownership doesn't)
-    storage/        StorageProvider interface + S3 implementation
+    storage/        StorageProvider interface + S3 implementation (for
+                     real uploads later — demo downloads use local disk)
     email/          Resend wrapper
     rate-limit.ts   Upstash rate limiters
   types/
@@ -141,6 +158,9 @@ src/
   proxy.ts          session + role gating (Next.js 16 renamed `middleware` to `proxy`)
 prisma/
   schema.prisma     datasource + generator only until Milestone 2
+data/
+  demo-documents/   the actual demo .docx/.pdf/.png files (not in `public/`,
+                    so they're only reachable through the signed route)
 ```
 
 ## What's a placeholder vs. real, right now
@@ -153,6 +173,9 @@ prisma/
 - The `(portal)` and `firm/*` routes are now access-controlled by role,
   but every client sees the same fixed placeholder matters — there's no
   per-client data yet, because there's no `Matter` model yet.
+- Document downloads are real (signed short-lived URLs, session + role
+  check) but against a hardcoded document list and local disk, not the
+  real `Document` model or `src/lib/storage` object storage yet.
 - The contact form and firm-side action buttons are visually complete but
   disabled — no server action is wired up yet.
 - The Resend magic-link provider is written but disabled (needs a
