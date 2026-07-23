@@ -45,7 +45,6 @@ export default async function AttorneyPage({ params }: Props) {
     description: attorney.bio,
     image: attorney.image,
     email: attorney.email,
-    telephone: attorney.phone,
     url: `${SITE_URL}/attorneys/${attorney.slug}`,
     worksFor: {
       "@type": "LegalService",
@@ -115,9 +114,6 @@ export default async function AttorneyPage({ params }: Props) {
           <Card className="h-fit">
             <h2 className="font-display text-lg">Contact</h2>
             <p className="mt-3 text-sm text-muted-foreground">{attorney.email}</p>
-            <p className="mt-1 font-mono text-sm text-muted-foreground">
-              {attorney.phone}
-            </p>
             <Link href="/contact" className="mt-6 block" transitionTypes={["nav-forward"]}>
               <Button variant="primary" className="w-full">
                 Schedule a Consultation

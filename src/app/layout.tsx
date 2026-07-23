@@ -64,7 +64,6 @@ const legalServiceSchema = {
   "@type": "LegalService",
   name: SITE_NAME,
   url: SITE_URL,
-  telephone: offices[0].phone,
   address: {
     "@type": "PostalAddress",
     streetAddress: offices[0].address,

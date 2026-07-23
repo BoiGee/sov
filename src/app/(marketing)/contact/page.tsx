@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Reveal } from "@/components/motion/reveal";
@@ -122,12 +122,8 @@ export default function ContactPage() {
               <h2 className="font-display text-lg">Prefer to reach out directly?</h2>
               <ul className="mt-5 space-y-4 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2.5">
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                  <span className="font-mono">{offices[0].phone}</span>
-                </li>
-                <li className="flex items-start gap-2.5">
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                  <span className="font-mono">intake@sovereignapexlegal.example</span>
+                  <span className="font-mono">contact@sovereignapexlegal.com</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />

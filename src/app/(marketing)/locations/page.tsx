@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin, Phone, Clock, ArrowUpRight } from "lucide-react";
+import { MapPin, Clock, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Reveal } from "@/components/motion/reveal";
 import { offices } from "@/lib/content/offices";
@@ -62,10 +62,6 @@ export default function LocationsPage() {
                     <p className="flex items-start gap-2">
                       <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                       {office.address}
-                    </p>
-                    <p className="flex items-center gap-2 font-mono">
-                      <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                      {office.phone}
                     </p>
                     <p className="flex items-center gap-2">
                       <Clock className="h-4 w-4 shrink-0 text-primary" aria-hidden />

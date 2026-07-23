@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, Scale } from "lucide-react";
+import { Mail, Scale } from "lucide-react";
 import { practiceAreas } from "@/lib/content/practice-areas";
 import { offices } from "@/lib/content/offices";
 
@@ -77,12 +77,8 @@ export function SiteFooter() {
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span className="font-mono">{offices[0].phone}</span>
-              </li>
-              <li className="flex items-start gap-2">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span className="font-mono">intake@sovereignapexlegal.example</span>
+                <span className="font-mono">contact@sovereignapexlegal.com</span>
               </li>
             </ul>
             <ul className="mt-5 space-y-3 text-xs text-muted-foreground">
