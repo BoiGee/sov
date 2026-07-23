@@ -3,6 +3,12 @@ import { auth } from "@/lib/auth";
 
 const CLIENT_PATH_PREFIXES = ["/dashboard", "/matters", "/settings"];
 const FIRM_PATH_PREFIX = "/firm";
+// Case data (matters, documents, docket) is attorney + client only now —
+// staff/admin keep the rest of the firm workspace (leads, account admin).
+// `/firm/clients` (creating client portal logins) and `/firm/attorneys`
+// (creating other attorney logins) are grouped in with case data too,
+// since granting either kind of access is an attorney-level action.
+const FIRM_ATTORNEY_ONLY_PREFIXES = ["/firm/matters", "/firm/clients", "/firm/attorneys"];
 
 function matchesPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -10,10 +16,13 @@ function matchesPrefix(pathname: string, prefix: string) {
 
 /**
  * Gates the client portal and firm workspace behind the demo login from
- * Milestone "1.5". Ownership checks (a client can only see *their own*
- * matters) still don't exist — that requires real `Matter` records and
- * lands with `src/lib/rbac.ts` in Milestone 3. This only enforces
- * authentication + coarse role separation.
+ * Milestone "1.5". Case data specifically (`/firm/matters*`) is
+ * attorney + client only — staff/admin keep the rest of the firm workspace
+ * (leads, account admin) but not matters/documents/docket. Per-matter
+ * ownership (this attorney is assigned to *this* matter, this client owns
+ * *that* matter) is enforced at the route/page level against
+ * `src/lib/demo-matters.ts` and `src/lib/demo-clients.ts`, not here — this
+ * layer only does coarse role separation.
  */
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -33,11 +42,20 @@ export default auth((req) => {
   const role = session.user.role;
 
   if (isClientPath && role !== "client") {
-    return NextResponse.redirect(new URL("/firm/matters", req.nextUrl));
+    return NextResponse.redirect(
+      new URL(role === "attorney" ? "/firm/matters" : "/firm/leads", req.nextUrl)
+    );
   }
 
   if (isFirmPath && role === "client") {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+  }
+
+  const isFirmAttorneyOnlyPath = FIRM_ATTORNEY_ONLY_PREFIXES.some((prefix) =>
+    matchesPrefix(pathname, prefix)
+  );
+  if (isFirmAttorneyOnlyPath && role !== "attorney") {
+    return NextResponse.redirect(new URL("/firm/leads", req.nextUrl));
   }
 
   return NextResponse.next();

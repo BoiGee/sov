@@ -1,59 +1,56 @@
 import { DocketBoard, type DocketRow } from "@/components/portal/docket-board";
 import { Card } from "@/components/ui/card";
+import { Reveal } from "@/components/motion/reveal";
+import { auth } from "@/lib/auth";
+import { getMattersForClient } from "@/lib/demo-matters";
+import { getClientByEmail } from "@/lib/demo-clients";
 
 export const metadata = { title: "Dashboard" };
 
-// Placeholder rows — replaced by a real Prisma query scoped to the
-// signed-in client's matters in Milestone 5.
-const placeholderRows: DocketRow[] = [
-  {
-    id: "1",
-    caseNumber: "FL-2026-00182",
-    matter: "Dissolution of Marriage",
-    status: "Discovery",
-    nextDate: "Aug 14, 2026",
-  },
-  {
-    id: "2",
-    caseNumber: "RE-2025-00937",
-    matter: "Purchase Agreement Review — 214 Birch St.",
-    status: "Resolved",
-  },
-  {
-    id: "3",
-    caseNumber: "EP-2026-00041",
-    matter: "Revocable Living Trust",
-    status: "Filed",
-    nextDate: "Aug 3, 2026",
-  },
-];
+export default async function DashboardPage() {
+  const session = await auth();
+  const client = session?.user?.email ? getClientByEmail(session.user.email) : undefined;
+  const matters = client ? await getMattersForClient(client.id) : [];
 
-const upcomingDates = [
-  { date: "Aug 3, 2026", label: "Document deadline — Revocable Living Trust", caseNumber: "EP-2026-00041" },
-  { date: "Aug 14, 2026", label: "Discovery deadline — Dissolution of Marriage", caseNumber: "FL-2026-00182" },
-];
+  const rows: DocketRow[] = matters.map((matter) => ({
+    id: matter.id,
+    caseNumber: matter.caseNumber,
+    matter: matter.title,
+    status: matter.status,
+    nextDate: matter.nextDate,
+    practiceArea: matter.practiceArea,
+  }));
 
-const stats = [
-  { label: "Open Matters", value: placeholderRows.filter((r) => r.status !== "Resolved").length },
-  { label: "Upcoming Dates", value: upcomingDates.length },
-  { label: "Unread Messages", value: 0 },
-];
+  const upcomingDates = matters
+    .filter((matter) => matter.nextDate)
+    .map((matter) => ({
+      date: matter.nextDate!,
+      label: matter.title,
+      caseNumber: matter.caseNumber,
+    }));
 
-export default function DashboardPage() {
+  const stats = [
+    { label: "Open Matters", value: rows.filter((r) => r.status !== "Resolved").length },
+    { label: "Upcoming Dates", value: upcomingDates.length },
+    { label: "Unread Messages", value: 0 },
+  ];
+
   return (
     <div>
       <h1 className="font-display text-3xl">Your Matters</h1>
       <p className="mt-2 text-muted-foreground">
-        Every matter Sterling Vance LLP is handling on your behalf, with its
+        Every matter Sovereign Apex Legal LLP is handling on your behalf, with its
         current stage and next key date.
       </p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <Card key={stat.label}>
-            <p className="font-display text-3xl text-primary">{stat.value}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-          </Card>
+        {stats.map((stat, i) => (
+          <Reveal key={stat.label} delay={i * 60}>
+            <Card>
+              <p className="font-display text-3xl text-primary">{stat.value}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+            </Card>
+          </Reveal>
         ))}
       </div>
 
@@ -62,7 +59,7 @@ export default function DashboardPage() {
           <h2 className="font-display text-xl">Docket Board</h2>
           <div className="mt-4">
             <DocketBoard
-              rows={placeholderRows}
+              rows={rows}
               getHref={(row) => `/matters/${row.id}`}
             />
           </div>
@@ -76,7 +73,7 @@ export default function DashboardPage() {
             ) : (
               <ul className="space-y-4">
                 {upcomingDates.map((item) => (
-                  <li key={item.label} className="text-sm">
+                  <li key={item.caseNumber} className="text-sm">
                     <p className="font-mono text-xs text-primary">{item.date}</p>
                     <p className="mt-1">{item.label}</p>
                     <p className="mt-1 text-xs text-muted-foreground">

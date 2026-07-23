@@ -9,28 +9,28 @@
 export const DEMO_ACCOUNTS = [
   {
     id: "demo-client-1",
-    email: "client@demo.sterlingvance.example",
+    email: "client@demo.sovereignapexlegal.example",
     password: "ClientDemo123!",
     name: "Jordan Alvarez",
     role: "client" as const,
   },
   {
     id: "demo-attorney-1",
-    email: "attorney@demo.sterlingvance.example",
+    email: "attorney@demo.sovereignapexlegal.example",
     password: "AttorneyDemo123!",
-    name: "Eleanor Sterling",
+    name: "Eleanor Whitmore",
     role: "attorney" as const,
   },
   {
     id: "demo-staff-1",
-    email: "staff@demo.sterlingvance.example",
+    email: "staff@demo.sovereignapexlegal.example",
     password: "StaffDemo123!",
     name: "Demo Staff",
     role: "staff" as const,
   },
   {
     id: "demo-admin-1",
-    email: "admin@demo.sterlingvance.example",
+    email: "admin@demo.sovereignapexlegal.example",
     password: "AdminDemo123!",
     name: "Demo Admin",
     role: "admin" as const,

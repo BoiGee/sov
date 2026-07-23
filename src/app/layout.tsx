@@ -1,5 +1,9 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Libre_Caslon_Display } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Fraunces } from "next/font/google";
+import { SplashScreen } from "@/components/motion/splash-screen";
+import { SITE_NAME, SITE_URL } from "@/lib/site-config";
+import { jsonLd } from "@/lib/structured-data";
+import { offices } from "@/lib/content/offices";
 import "./globals.css";
 
 const sansFont = IBM_Plex_Sans({
@@ -14,19 +18,58 @@ const monoFont = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
-const displayFont = Libre_Caslon_Display({
+// Fraunces: a variable serif with real optical-size character — replaces the
+// flatter Libre Caslon Display so headings carry more personality without
+// losing the firm's formal tone. Italic is used for pull-quotes/taglines.
+const displayFont = Fraunces({
   variable: "--font-display-family",
   subsets: ["latin"],
-  weight: "400",
+  weight: "variable",
+  style: ["normal", "italic"],
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
+const DEFAULT_DESCRIPTION =
+  "Sovereign Apex Legal LLP is a general-practice law firm serving clients across family law, business & corporate, personal injury, real estate, estate planning, criminal defense, employment, immigration, bankruptcy, and intellectual property.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Sterling Vance LLP",
-    template: "%s | Sterling Vance LLP",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Sterling Vance LLP is a general-practice law firm serving clients across family law, business & corporate, personal injury, real estate, estate planning, and criminal defense.",
+  description: DEFAULT_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
+  },
+};
+
+// Next.js 16: viewport/themeColor moved out of `metadata` into a separate export.
+export const viewport: Viewport = {
+  themeColor: "#150a0a",
+  colorScheme: "dark light",
+};
+
+const legalServiceSchema = {
+  "@context": "https://schema.org",
+  "@type": "LegalService",
+  name: SITE_NAME,
+  url: SITE_URL,
+  telephone: offices[0].phone,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: offices[0].address,
+  },
+  areaServed: ["Greater London", "England", "Wales"],
 };
 
 export default function RootLayout({
@@ -39,7 +82,14 @@ export default function RootLayout({
       lang="en"
       className={`${sansFont.variable} ${monoFont.variable} ${displayFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(legalServiceSchema) }}
+        />
+        <SplashScreen />
+        {children}
+      </body>
     </html>
   );
 }

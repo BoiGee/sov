@@ -1,6 +1,12 @@
 import { signDocumentToken } from "./sign";
 
-export { DEMO_DOCUMENTS, getDocumentsForMatter, getDocumentById } from "./data";
+export {
+  getDocumentsForMatter,
+  getDocumentById,
+  addDocument,
+  ALLOWED_UPLOAD_MIME_TYPES,
+  MAX_UPLOAD_SIZE_BYTES,
+} from "./data";
 export type { DemoDocument, DemoDocumentVisibility } from "./data";
 export { verifyDocumentToken } from "./sign";
 

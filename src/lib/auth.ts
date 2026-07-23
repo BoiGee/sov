@@ -3,13 +3,20 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { DEMO_ACCOUNTS } from "@/lib/demo-accounts";
+import { getClientAccountByEmail } from "@/lib/client-accounts";
+import { getAttorneyAccountByEmail } from "@/lib/attorney-accounts";
 
 /**
- * Demo login only (ahead of Milestone 2/3). `authorize` checks against the
- * hardcoded, non-persisted accounts in `src/lib/demo-accounts.ts` — hashed
+ * Demo login only (ahead of Milestone 2/3). `authorize` checks three
+ * sources: the hardcoded, non-persisted attorney/staff/admin accounts in
+ * `src/lib/demo-accounts.ts`; client accounts self-registered via `/signup`
+ * or created by an attorney through `/firm/clients`, persisted to Upstash
+ * Redis (`src/lib/client-accounts.ts`); and attorney accounts created by
+ * an existing attorney through `/firm/attorneys`, also persisted to
+ * Upstash (`src/lib/attorney-accounts.ts`). All three are hashed/compared
  * with bcrypt here so the code path already matches what a real Prisma
- * lookup will look like. There is no Prisma adapter, no password reset, no
- * MFA, and no rate limiting on this endpoint yet; all of that lands in
+ * lookup will look like. There is no Prisma adapter, no password reset,
+ * no MFA, and no rate limiting on this endpoint yet; all of that lands in
  * Milestone 3 alongside the real `User` model.
  */
 const DEMO_USERS = DEMO_ACCOUNTS.map((account) => ({
@@ -34,17 +41,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const user = DEMO_USERS.find((u) => u.email === parsed.data.email);
-        if (!user) return null;
+        if (user && bcrypt.compareSync(parsed.data.password, user.passwordHash)) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        }
 
-        const valid = bcrypt.compareSync(parsed.data.password, user.passwordHash);
-        if (!valid) return null;
+        const clientAccount = await getClientAccountByEmail(parsed.data.email);
+        if (
+          clientAccount &&
+          bcrypt.compareSync(parsed.data.password, clientAccount.passwordHash)
+        ) {
+          return {
+            id: clientAccount.id,
+            email: clientAccount.email,
+            name: clientAccount.name,
+            role: "client" as const,
+          };
+        }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
+        const attorneyAccount = await getAttorneyAccountByEmail(parsed.data.email);
+        if (
+          attorneyAccount &&
+          bcrypt.compareSync(parsed.data.password, attorneyAccount.passwordHash)
+        ) {
+          return {
+            id: attorneyAccount.id,
+            email: attorneyAccount.email,
+            name: attorneyAccount.name,
+            role: "attorney" as const,
+          };
+        }
+
+        return null;
       },
     }),
     // Resend magic-link provider is disabled for now: Auth.js requires a

@@ -1,4 +1,7 @@
-export const metadata = { title: "Attorney Advertising Disclaimer" };
+export const metadata = {
+  title: "Attorney Advertising Disclaimer",
+  description: "Required attorney advertising disclosures for Sovereign Apex Legal LLP.",
+};
 
 export default function AttorneyAdvertisingPage() {
   return (
@@ -6,9 +9,9 @@ export default function AttorneyAdvertisingPage() {
       <h1 className="font-display text-4xl">Attorney Advertising Disclaimer</h1>
       <p className="mt-6 text-muted-foreground">
         This website is attorney advertising. Prior results do not guarantee
-        a similar outcome. Placeholder copy — the real disclaimer must be
-        reviewed against the advertising rules of every jurisdiction Sterling
-        Vance LLP is licensed in before this site goes live with real
+        a similar outcome. Placeholder copy: the real disclaimer must be
+        reviewed against the advertising rules of every jurisdiction Sovereign
+        Apex Legal LLP is licensed in before this site goes live with real
         content.
       </p>
     </div>

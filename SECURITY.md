@@ -14,10 +14,17 @@ session and coarse role check (client vs. attorney/staff/admin). But:
 - Credentials are checked against a **hardcoded list**
   (`src/lib/demo-accounts.ts`), not a database. There is no real `User`
   table yet — that's still Milestone 2.
-- There is **no ownership/ID-based access control**. Once signed in, every
-  client sees the same hardcoded placeholder matters — real per-client
-  scoping requires the `Matter` model and `src/lib/rbac.ts` (currently a
-  placeholder that throws if called), both landing in Milestone 3.
+- **Ownership-based access control now exists for matters/documents, ahead
+  of schedule — but against demo data, not a real database.**
+  `src/lib/demo-matters.ts` and `src/lib/demo-clients.ts` model which
+  attorney is assigned to which matter and which client is linked to it;
+  every matter/document/status/event route checks that server-side (see
+  below), and `src/proxy.ts` additionally restricts `/firm/matters*` to
+  the `attorney` role only (`staff`/`admin` keep the rest of the firm
+  workspace, not case data). This is real logic, just sitting on top of a
+  hardcoded, in-memory list instead of the `Matter`/`Client` models and
+  `src/lib/rbac.ts` (currently a placeholder that throws if called) that
+  land in Milestone 2/3.
 - No MFA, no password reset, no rate limiting on the login endpoint, no
   account lockout. The Resend magic-link provider is disabled entirely
   (it requires a database adapter Auth.js doesn't have yet).
@@ -30,16 +37,74 @@ session and coarse role check (client vs. attorney/staff/admin). But:
 solely so the portal/workspace UI can be clicked through before the real
 data layer lands.
 
-**Document downloads (`src/lib/demo-documents`, `/api/documents/[id]/download`)
-are also a demo shortcut layered on real security mechanics.** The route
-handler requires an authenticated session, rejects the `client` role
-outright (no per-matter ownership check exists yet to do this safely), and
-validates a short-lived HMAC-signed token before reading the file — the
-same "authenticate + verify a signed URL, never expose a permanent public
-link" shape production will use, just against a hardcoded document list
-and local disk instead of a real `Document` table and object storage. It
-reuses `AUTH_SECRET` to sign tokens; give document-download tokens their
-own secret before this becomes real.
+- **Attorneys can create client portal logins themselves**
+  (`/firm/clients`, attorney role only), persisted to Upstash Redis via
+  `src/lib/client-accounts.ts` — not a local file, not a relational
+  database. Passwords are bcrypt-hashed before being written, the same as
+  the hardcoded demo accounts, but there is intentionally **no email
+  verification step**: setting the password is enough, because the
+  attorney creating the account is already an authenticated, trusted actor
+  in this demo's threat model. This is a deliberate architecture choice,
+  not an oversight: Vercel's serverless functions have no writable disk
+  outside `/tmp` and no memory shared across instances, so the original
+  local-JSON-file approach would either crash on write or silently
+  disagree with itself between requests once actually deployed there.
+  Upstash's REST API works identically from any instance. There is still
+  no password reset, no MFA, no rate limiting, and no audit log for who
+  created or revoked which account.
+- **Clients can also self-register at `/signup`, with no gate at all.**
+  This is genuinely open registration — anyone who reaches that URL can
+  create a client-role account with any name/email/password, no
+  verification of any kind, and it lands in the same Upstash-backed store
+  above (`createClientAccount` is shared by both paths). This is a
+  deliberate, requested tradeoff for this demo ("password should be
+  enough"), but it is the single biggest gap versus a real client intake
+  process: a real deployment must add email verification (or an
+  attorney-issued invite requirement) before this goes anywhere near
+  actual client data, since right now nothing stops someone from
+  registering with an email they don't own.
+- **Attorneys can create other attorney accounts** (`/firm/attorneys`,
+  attorney role only, not open registration), persisted to Upstash Redis
+  via `src/lib/attorney-accounts.ts` — same bcrypt-hashing, same "no audit
+  log" caveats as the client-accounts store above. Because this grants
+  full firm-workspace access (matters, documents, status changes, the
+  ability to invite further attorneys), it is intentionally **not**
+  self-service the way client signup is: only an already-authenticated
+  attorney can create one.
+
+**Document uploads/downloads and live case tracking
+(`src/lib/demo-documents`, `/api/documents/[id]/download`,
+`/api/matters/[id]/documents`, `/api/matters/[id]/status`,
+`/api/matters/[id]/version`) are also a demo shortcut layered on real
+security mechanics.** Every one of those routes requires an authenticated
+session and re-checks the same ownership rule as the pages: the assigned
+attorney can act on their own matters; the linked client can only download
+documents explicitly marked `client`-visible on their own matter;
+everyone else (including `staff`/`admin`) gets a 403. Downloads
+additionally validate a short-lived HMAC-signed token before reading the
+file — the same "authenticate + verify a signed URL, never expose a
+permanent public link" shape production will use, just against demo
+metadata instead of a real `Document` table and object storage. The token
+reuses `AUTH_SECRET`; give document-download tokens their own secret
+before this becomes real. Document metadata itself lives in Upstash
+Redis (same reasoning as the account stores above), but **no uploaded
+file's actual bytes are stored anywhere** — only the four seed documents
+(committed under `data/demo-documents/`) serve real content; anything
+uploaded through the app gets a generated placeholder on download
+instead. That sidesteps the "no writable disk on Vercel" problem
+entirely for uploads, at the cost of uploads not being real, which is a
+deliberate, requested tradeoff for now, not a bug. Live case tracking
+(`LiveMatterUpdates`) used to be a persistent SSE connection backed by an
+in-memory `EventEmitter`, which only worked within a single server
+process; it's now short-interval polling (every 3 seconds) against a
+per-matter version counter in Upstash Redis (`getMatterVersion`/
+`bumpMatterVersion` in `src/lib/demo-matters.ts`), bumped by every status
+change, document upload, and self-assignment. That survives Vercel's
+serverless model correctly: no persistent connection to hold open, and
+every instance reads the same counter. The tradeoff is latency (up to
+~3 seconds instead of instant push) and a small constant stream of poll
+requests for as long as a matter page stays open, both acceptable for
+this app's scale.
 
 ## What real production use will require, beyond finishing the build
 
@@ -66,7 +131,7 @@ this application handles real client data, the firm should also arrange:
 
 ## Security properties this build targets (tracked per milestone)
 
-- Every API route/server action enforces both authentication *and*
+- Every API route/server action enforces both authentication _and_
   ownership (a client must never reach another client's matter by
   guessing an ID) — lands in Milestone 3.
 - Document downloads only ever go through short-lived signed URLs, never

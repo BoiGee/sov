@@ -1,7 +1,5 @@
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-
-const redis = Redis.fromEnv();
+import { redis } from "@/lib/redis";
 
 // Wired into the sign-in/magic-link routes in Milestone 3.
 export const authRateLimit = new Ratelimit({

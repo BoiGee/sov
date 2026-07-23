@@ -5,6 +5,10 @@ import {
   Home,
   ScrollText,
   Gavel,
+  Briefcase,
+  Globe,
+  Banknote,
+  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 import type { PracticeAreaSlug } from "@/lib/content/practice-areas";
@@ -17,6 +21,10 @@ const iconBySlug: Record<PracticeAreaSlug, LucideIcon> = {
   "real-estate": Home,
   "estate-planning": ScrollText,
   "criminal-defense": Gavel,
+  "employment-law": Briefcase,
+  "immigration-law": Globe,
+  bankruptcy: Banknote,
+  "intellectual-property": Lightbulb,
 };
 
 export function PracticeAreaIcon({

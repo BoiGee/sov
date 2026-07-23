@@ -6,6 +6,8 @@ import { practiceAreas } from "@/lib/content/practice-areas";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AttorneyAvatar } from "@/components/marketing/attorney-avatar";
+import { jsonLd } from "@/lib/structured-data";
+import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 
 export function generateStaticParams() {
   return attorneys.map((attorney) => ({ slug: attorney.slug }));
@@ -18,7 +20,16 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const attorney = attorneys.find((a) => a.slug === slug);
-  return { title: attorney?.name ?? "Attorney" };
+  if (!attorney) return { title: "Attorney" };
+  return {
+    title: attorney.name,
+    description: `${attorney.name}, ${attorney.title} at Sovereign Apex Legal LLP. ${attorney.bio}`,
+    openGraph: {
+      title: `${attorney.name} | Sovereign Apex Legal LLP`,
+      description: attorney.bio,
+      images: attorney.image ? [attorney.image] : undefined,
+    },
+  };
 }
 
 export default async function AttorneyPage({ params }: Props) {
@@ -26,12 +37,37 @@ export default async function AttorneyPage({ params }: Props) {
   const attorney = attorneys.find((a) => a.slug === slug);
   if (!attorney) notFound();
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: attorney.name,
+    jobTitle: attorney.title,
+    description: attorney.bio,
+    image: attorney.image,
+    email: attorney.email,
+    telephone: attorney.phone,
+    url: `${SITE_URL}/attorneys/${attorney.slug}`,
+    worksFor: {
+      "@type": "LegalService",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    alumniOf: attorney.education.map((edu) => ({
+      "@type": "EducationalOrganization",
+      name: edu.school,
+    })),
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(personSchema) }}
+      />
       <section className="mx-auto max-w-4xl px-6 py-20">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-[2fr_1fr]">
           <div>
-            <AttorneyAvatar name={attorney.name} size="lg" />
+            <AttorneyAvatar name={attorney.name} image={attorney.image} size="lg" />
             <h1 className="mt-6 font-display text-4xl">{attorney.name}</h1>
             <p className="mt-2 text-primary">{attorney.title}</p>
             <p className="mt-6 text-lg text-muted-foreground">{attorney.bio}</p>
@@ -82,7 +118,7 @@ export default async function AttorneyPage({ params }: Props) {
             <p className="mt-1 font-mono text-sm text-muted-foreground">
               {attorney.phone}
             </p>
-            <Link href="/contact" className="mt-6 block">
+            <Link href="/contact" className="mt-6 block" transitionTypes={["nav-forward"]}>
               <Button variant="primary" className="w-full">
                 Schedule a Consultation
               </Button>

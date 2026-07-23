@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DEMO_ACCOUNTS } from "@/lib/demo-accounts";
 import { loginAction } from "./actions";
 
 export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
@@ -43,31 +42,6 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       <Button type="submit" variant="primary" className="w-full">
         Sign In
       </Button>
-
-      <div className="mt-6 border-t border-border pt-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Demo accounts
-        </p>
-        <div className="mt-3 space-y-2">
-          {DEMO_ACCOUNTS.map((account) => (
-            <button
-              key={account.id}
-              type="button"
-              onClick={() => {
-                setEmail(account.email);
-                setPassword(account.password);
-              }}
-              className="flex w-full items-center justify-between rounded-sm border border-border px-3 py-2 text-left text-xs hover:border-primary"
-            >
-              <span>
-                {account.name}{" "}
-                <span className="text-muted-foreground">({account.role})</span>
-              </span>
-              <span className="text-primary">Use</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </form>
   );
 }

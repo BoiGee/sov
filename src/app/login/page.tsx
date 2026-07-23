@@ -20,12 +20,12 @@ export default async function LoginPage({ searchParams }: Props) {
       <Card className="w-full max-w-sm">
         <Link href="/" className="flex items-center gap-2 font-display text-lg">
           <Scale className="h-4 w-4 text-primary" aria-hidden />
-          Sterling Vance <span className="text-primary">LLP</span>
+          Sovereign Apex <span className="text-primary">Legal</span>
         </Link>
-        <h1 className="mt-6 font-display text-2xl">Sign In</h1>
+        <h1 className="mt-6 font-display text-2xl">Client Portal Sign In</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Demo login — pick an account below or type its credentials. Real
-          accounts land in Milestone 3.
+          Enter your email and password to sign in. Client, attorney, and
+          firm staff accounts all use this same form.
         </p>
         {params.error && (
           <p
@@ -36,6 +36,12 @@ export default async function LoginPage({ searchParams }: Props) {
           </p>
         )}
         <LoginForm callbackUrl={callbackUrl} />
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          New client?{" "}
+          <Link href="/signup" className="text-primary hover:underline">
+            Create an account
+          </Link>
+        </p>
       </Card>
     </div>
   );

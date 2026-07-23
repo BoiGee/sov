@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Leads — Firm Workspace" };
+export const metadata = { title: "Leads | Firm Workspace" };
 
 const placeholderLeads = [
   {

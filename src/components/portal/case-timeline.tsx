@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function CaseTimeline({
@@ -19,27 +20,38 @@ export function CaseTimeline({
             <div className="flex items-center gap-3 sm:flex-col sm:items-center">
               <span
                 className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-medium",
+                  "timeline-step relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-medium",
                   isComplete && "border-success bg-success text-primary-foreground",
                   isCurrent && "border-primary text-primary",
                   !isComplete && !isCurrent && "border-border text-muted-foreground"
                 )}
+                style={{ animationDelay: `${index * 120}ms` }}
               >
-                {index + 1}
+                {isCurrent && (
+                  <span
+                    className="pulse-ring absolute inset-0 rounded-full border-2 border-primary"
+                    aria-hidden
+                  />
+                )}
+                {isComplete ? <Check className="h-4 w-4" aria-hidden /> : index + 1}
               </span>
               {index < stages.length - 1 && (
                 <span
-                  className={cn(
-                    "h-px flex-1 sm:mt-4 sm:h-0.5 sm:w-full",
-                    isComplete ? "bg-success" : "bg-border"
-                  )}
+                  className="relative h-px flex-1 overflow-hidden bg-border sm:mt-4 sm:h-0.5 sm:w-full"
                   aria-hidden
-                />
+                >
+                  {isComplete && (
+                    <span
+                      className="timeline-line-fill absolute inset-0 bg-success"
+                      style={{ animationDelay: `${index * 120 + 150}ms` }}
+                    />
+                  )}
+                </span>
               )}
             </div>
             <span
               className={cn(
-                "text-sm",
+                "text-sm transition-colors duration-500",
                 isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
               )}
             >

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 
-export const metadata = { title: "Admin — Firm Workspace" };
+export const metadata = { title: "Admin | Firm Workspace" };
 
 export default function AdminPage() {
   return (
